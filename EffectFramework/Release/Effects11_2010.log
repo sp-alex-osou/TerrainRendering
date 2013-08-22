@@ -1,0 +1,23 @@
+﻿Der Buildvorgang wurde am 14.05.2012 22:53:56 gestartet.
+     1>Projekt "C:\Users\Alex\FH\Master\4. Semester\Masterarbeit\TerrainRendering\EffectFramework\Effects11_2010.vcxproj" auf Knoten "2", build Ziel(e).
+     1>InitializeBuildStatus:
+         "Release\EffectFramework.unsuccessfulbuild" wird erstellt, da "AlwaysCreate" angegeben wurde.
+       ClCompile:
+         Alle Ausgaben sind aktuell.
+       Lib:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\Lib.exe /OUT:"C:\Users\Alex\FH\Master\4. Semester\Masterarbeit\TerrainRendering\Release\EffectFramework.lib" /NOLOGO /LTCG Release\d3dx11dbg.obj
+         Release\d3dxGlobal.obj
+         Release\EffectAPI.obj
+         Release\EffectLoad.obj
+         Release\EffectNonRuntime.obj
+         Release\EffectReflection.obj
+         Release\EffectRuntime.obj
+         Effects11_2010.vcxproj -> C:\Users\Alex\FH\Master\4. Semester\Masterarbeit\TerrainRendering\Release\EffectFramework.lib
+       FinalizeBuildStatus:
+         Die Datei "Release\EffectFramework.unsuccessfulbuild" wird gelöscht.
+         Aktualisieren des Timestamps von "Release\EffectFramework.lastbuildstate".
+     1>Die Erstellung des Projekts "C:\Users\Alex\FH\Master\4. Semester\Masterarbeit\TerrainRendering\EffectFramework\Effects11_2010.vcxproj" ist abgeschlossen, build Ziel(e).
+
+Das Erstellen war erfolgreich.
+
+Verstrichene Zeit 00:00:00.28

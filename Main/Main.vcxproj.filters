@@ -1,0 +1,330 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns:atg="http://atg.xbox.com" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{8e114980-c1a3-4ada-ad7c-83caadf5daeb}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="DXUT">
+      <UniqueIdentifier>{a43c5c25-0e86-4a20-b64a-883785ff74fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{6ee79176-95b5-40d3-9db8-95886b6623ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Helpers">
+      <UniqueIdentifier>{5167d49e-3e45-40b7-8953-8be6f8bd3a8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Types">
+      <UniqueIdentifier>{f61acde3-af13-4735-b691-adcaa6b72af8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Terrain">
+      <UniqueIdentifier>{531675bf-e069-4441-a8a4-1925fb72edc0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera">
+      <UniqueIdentifier>{74edd54d-db59-4773-ab1a-b0da7ec5761e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{f7386f57-6f35-4ef3-bc97-d0882d3de92f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content">
+      <UniqueIdentifier>{f579de0c-44fb-4ae0-a0cf-6fba7a04841b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content\Effects">
+      <UniqueIdentifier>{60a3bf54-b007-4dd6-9ac8-e2d64e53960a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content\Textures">
+      <UniqueIdentifier>{20d5e49e-1519-4af0-b51d-8e50ce07978c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content\UI">
+      <UniqueIdentifier>{0fd51063-ac80-477b-bb4a-36bcfc21ccfd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Evaluation">
+      <UniqueIdentifier>{325e2e80-5902-4f01-bc1f-5051bd23932a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{fa42f6c9-7522-4a75-b856-20d7bc4b494d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DXUT\Optional\directx.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <ClInclude Include="DXUT\Core\DXUT.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUT\Core\DXUTDevice11.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUT\Core\DXUTDevice9.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUT\Core\DXUTmisc.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClCompile Include="DXUT\Core\DXUT.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUT\Core\DXUTDevice11.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUT\Core\DXUTDevice9.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUT\Core\DXUTmisc.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClInclude Include="DXUT\Optional\DXUTcamera.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUT\Optional\DXUTgui.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUT\Optional\DXUTres.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUT\Optional\DXUTsettingsdlg.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUT\Optional\SDKmesh.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClInclude Include="DXUT\Optional\SDKmisc.h">
+      <Filter>DXUT</Filter>
+    </ClInclude>
+    <ClCompile Include="DXUT\Optional\DXUTcamera.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUT\Optional\DXUTgui.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUT\Optional\DXUTres.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUT\Optional\DXUTsettingsdlg.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUT\Optional\SDKmesh.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <ClCompile Include="DXUT\Optional\SDKmisc.cpp">
+      <Filter>DXUT</Filter>
+    </ClCompile>
+    <None Include="Content\Effects\Terrain.fx">
+      <Filter>Content\Effects</Filter>
+    </None>
+    <None Include="Content\UI\Font.dds">
+      <Filter>Content\UI</Filter>
+    </None>
+    <None Include="Content\Textures\Grass.dds">
+      <Filter>Content\Textures</Filter>
+    </None>
+    <None Include="Content\Textures\Normalmap.dds">
+      <Filter>Content\Textures</Filter>
+    </None>
+    <None Include="Content\Textures\Rock.dds">
+      <Filter>Content\Textures</Filter>
+    </None>
+    <None Include="Content\Textures\Heightmap.dds">
+      <Filter>Content\Textures</Filter>
+    </None>
+    <None Include="Content\Textures\Snow.dds">
+      <Filter>Content\Textures</Filter>
+    </None>
+    <None Include="Content\Textures\Sand.dds">
+      <Filter>Content\Textures</Filter>
+    </None>
+    <None Include="Content\Textures\Stone.dds">
+      <Filter>Content\Textures</Filter>
+    </None>
+    <None Include="Resources\GPUPerfAPIDX11.dll">
+      <Filter>Resources</Filter>
+    </None>
+    <None Include="Content\Textures\Colormap.dds">
+      <Filter>Content\Textures</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Types\Matrix.cpp">
+      <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Types\Quaternion.cpp">
+      <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Types\Vector2.cpp">
+      <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Types\Vector3.cpp">
+      <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Types\Vector4.cpp">
+      <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\Config.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\Window.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\Keyboard.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\KeyboardState.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\Mouse.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Input\MouseState.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Types\Plane.cpp">
+      <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain\Terrain.cpp">
+      <Filter>Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera\Camera.cpp">
+      <Filter>Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Types\BoundingBox.cpp">
+      <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Types\BoundingFrustum.cpp">
+      <Filter>Types</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain\TerrainEffect.cpp">
+      <Filter>Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="Helpers\Console.cpp">
+      <Filter>Helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain\TerrainPatch.cpp">
+      <Filter>Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain\TerrainHeightmap.cpp">
+      <Filter>Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\HUD.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Evaluation\Accuracy.cpp">
+      <Filter>Evaluation</Filter>
+    </ClCompile>
+    <ClCompile Include="Evaluation\Test.cpp">
+      <Filter>Evaluation</Filter>
+    </ClCompile>
+    <ClCompile Include="Evaluation\Profiler.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <CLInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </CLInclude>
+    <ClInclude Include="Types\Matrix.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\Point.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\Quaternion.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\Vector2.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\Vector3.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\Vector4.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Config.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Converter.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Window.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\InputDevice.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\Keyboard.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\KeyboardState.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\Mouse.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input\MouseState.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Types\Plane.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="input\Input.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="types\Types.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Helpers.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\GameTime.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain\Terrain.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera\Camera.h">
+      <Filter>Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\BoundingBox.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\BoundingFrustum.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\ContainmentType.h">
+      <Filter>Types</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\MathHelper.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain\TerrainEffect.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers\Console.h">
+      <Filter>Helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain\TerrainPatch.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain\TerrainHeightmap.h">
+      <Filter>Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\HUD.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Evaluation\Profiler.h">
+      <Filter>Evaluation</Filter>
+    </ClInclude>
+    <ClInclude Include="Evaluation\Accuracy.h">
+      <Filter>Evaluation</Filter>
+    </ClInclude>
+    <ClInclude Include="Evaluation\Test.h">
+      <Filter>Evaluation</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Main.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
