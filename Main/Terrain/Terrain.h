@@ -14,12 +14,6 @@
 
 class Terrain
 {
-	struct Node
-	{
-		unsigned textureIndex;
-		Node* children[4];
-	};
-
 	struct Instance
 	{
 		float col;
@@ -86,7 +80,6 @@ private:
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* instanceBuffer;
 
-	Node* nodes;
 	Instance* instances;
 
 	unsigned numInstances;
@@ -94,9 +87,9 @@ private:
 
 	float terrainScale;
 
-	static const unsigned terrainSize = 1024;
-	static const unsigned nodeSize = 4096;
-	static const unsigned patchSize = 64;
+	static const unsigned terrainSize;
+	static const unsigned nodeSize;
+	static const unsigned patchSize;
 
 	static const char* roughnessFilePath;
 	static const char* colorinfoFilePath;
@@ -121,20 +114,20 @@ private:
 	unsigned numRows;
 	unsigned numCols;
 
-	unsigned numPatches;
+	unsigned numPatchesPerNode;
 	unsigned numPatchRows;
 	unsigned numPatchCols;
 
 	TerrainEffect effect;
 	TerrainHeightmap heightmap;
 
-	void initNode(Node* node, ID3D11Device* graphicsDevice, unsigned row, unsigned col, unsigned size, unsigned& numCurrentNodes, ID3D11Texture2D** textures, unsigned& numTextures, float* patchRoughness);
-	void updateNode(Node* node, unsigned row, unsigned col, unsigned size, unsigned& numInstances, const D3DXVECTOR3& cameraPos, const BoundingFrustum& viewFrustum, bool frustumCulling);
+	void updateNode(unsigned row, unsigned col, unsigned size, unsigned& numInstances, const D3DXVECTOR3& cameraPos, const BoundingFrustum& viewFrustum, bool frustumCulling);
 
-	void initPatchRoughness(float* patchRoughness);
+	void initPatchRoughness(float** patchRoughness, unsigned numLevels) const;
 	void initVertexBuffer(ID3D11Device* graphicsDevice);
 	void initInstanceBuffer(ID3D11Device* graphicsDevice);
 
+	ID3D11ShaderResourceView* loadRoughnessmap(ID3D11Device* graphicsDevice) const;
 	ID3D11ShaderResourceView* loadInfomap(ID3D11Device* graphicsDevice, const D3DXVECTOR2* ranges, unsigned char numRanges) const;
 	ID3D11ShaderResourceView* loadTextureArray(ID3D11Device* graphicsDevice, const char** textureNames, unsigned numTextures) const;
 

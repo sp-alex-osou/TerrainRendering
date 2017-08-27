@@ -13,9 +13,9 @@ Texture2D Normalmap;
 Texture2D Infomap;
 Texture2D Slopemap;
 Texture2D Colormap;
+Texture2D Roughnessmap;
 
 Texture2DArray Colormaps;
-Texture2DArray Roughnessmaps;
 
 uint2 ScreenSize;
 float2 SlopeRange;
@@ -46,7 +46,7 @@ SamplerState SamplerLinearWrap
 {
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = Wrap;
-   AddressV = Wrap;
+	AddressV = Wrap;
 };
 
 
@@ -54,7 +54,7 @@ SamplerState SamplerLinearClamp
 {
 	Filter = MIN_MAG_MIP_LINEAR;
 	AddressU = Clamp;
-   AddressV = Clamp;
+	AddressV = Clamp;
 };
 
 
@@ -62,49 +62,46 @@ SamplerState SamplerPointClamp
 {
 	Filter = MIN_MAG_MIP_POINT;
 	AddressU = Clamp;
-   AddressV = Clamp;
+	AddressV = Clamp;
 };
 
 
 struct VSControlPoint
 {
-	float2 Position	: Position;
+	float2 Position : Position;
 };
 
 
 struct Node
 {
-	float2 Position	: NodePosition;
-	float Size			: NodeSize;
-	uint TextureIndex	: NodeTextureIndex;
+	float2 Position : NodePosition;
+	float Size : NodeSize;
 };
 
 
 struct ControlPoint
 {
-	float2 Position		: Position;
-	float2 PatchUV			: PatchUV;
-	float Size				: Size;
-	uint TextureIndex		: TextureIndex;
+	float2 Position : Position;
+	float Size : Size;
 };
 
 
 struct HSConstantOutput
 {
-	float Edges[4]				: SV_TessFactor;
-	float Inside[2]			: SV_InsideTessFactor;
-	float MipMapLevel			: MipMapLevel;
-	float4 Color				: Color;
-	bool Culled					: Culled;
+	float Edges[4] : SV_TessFactor;
+	float Inside[2] : SV_InsideTessFactor;
+	float MipMapLevel : MipMapLevel;
+	float4 Color : Color;
+	//bool Culled;
 };
 
 
 struct DSOutput
 {
-	float4 Position	: SV_Position;
+	float4 Position : SV_Position;
 	float2 TexCoord	: TexCoord;
-	float4 Color		: Color;
-	bool Culled			: Culled;
+	float4 Color : Color;
+	//bool Culled;
 };
 
 
@@ -165,9 +162,7 @@ ControlPoint VSDefault(VSControlPoint input, Node node)
 	node.Position *= TerrainScale;
 
 	cp.Size = node.Size / patchesPerNode;
-	cp.PatchUV = input.Position / patchesPerNode;
 	cp.Position = node.Position + input.Position * cp.Size;
-	cp.TextureIndex = node.TextureIndex;
 	
 	return cp;
 }
@@ -177,11 +172,12 @@ HSConstantOutput HSConstantDefault(InputPatch<ControlPoint, NUM_CONTROL_POINTS> 
 {
 	HSConstantOutput output;
 
-	output.Culled = false;
+	//output.Culled = false;
 
 	float2 pos = input[0].Position;
 	float size = input[0].Size;
 
+	uint lod = log2(size  / (MinPatchSize * TerrainScale));
 	float4 p[4];
 	uint i;
 
@@ -212,16 +208,16 @@ HSConstantOutput HSConstantDefault(InputPatch<ControlPoint, NUM_CONTROL_POINTS> 
 
 	if (RoughnessEnabled && !BruteForceEnabled && MinPixelPerTriangle != 0.0f)
 	{
-		float roughness = Roughnessmaps.SampleLevel(SamplerPointClamp, float3(input[0].PatchUV, input[0].TextureIndex), 0);
+		float2 roughnessUV = pos / TerrainSize;
+		float roughness = Roughnessmap.SampleLevel(SamplerPointClamp, roughnessUV, lod);
 			
 		float edges[4];
+		float delta = pow(2, lod) * MinPatchSize * TerrainScale / TerrainSize;
 
-		float delta = (float)MinPatchSize / (float)MinNodeSize;
-
-		edges[0] = Roughnessmaps.SampleLevel(SamplerPointClamp, float3(input[0].PatchUV + float2(-delta, 0), input[0].TextureIndex), 0);
-		edges[1] = Roughnessmaps.SampleLevel(SamplerPointClamp, float3(input[0].PatchUV + float2(0, +delta), input[0].TextureIndex), 0);
-		edges[2] = Roughnessmaps.SampleLevel(SamplerPointClamp, float3(input[0].PatchUV + float2(+delta, 0), input[0].TextureIndex), 0);
-		edges[3] = Roughnessmaps.SampleLevel(SamplerPointClamp, float3(input[0].PatchUV + float2(0, -delta), input[0].TextureIndex), 0);
+		edges[0] = Roughnessmap.SampleLevel(SamplerPointClamp, float2(roughnessUV + float2(-delta, 0)), lod);
+		edges[1] = Roughnessmap.SampleLevel(SamplerPointClamp, float2(roughnessUV + float2(0, +delta)), lod);
+		edges[2] = Roughnessmap.SampleLevel(SamplerPointClamp, float2(roughnessUV + float2(+delta, 0)), lod);
+		edges[3] = Roughnessmap.SampleLevel(SamplerPointClamp, float2(roughnessUV + float2(0, -delta)), lod);
 
 		for (i = 0; i < 4; ++i)
 			edges[i] = (edges[i] + roughness) * 0.5f;
@@ -240,10 +236,9 @@ HSConstantOutput HSConstantDefault(InputPatch<ControlPoint, NUM_CONTROL_POINTS> 
 		output.Inside[i] = min(output.Inside[i], MinPatchSize);
 
 	float4 color = float4(1, 1, 1, 1);
-	float level = size  / (MinPatchSize * TerrainScale) - 1;
 
-	if (ShowNodesEnabled && level < 4)
-		color = float4(1, level * 0.5f, 0, 1);
+	if (ShowNodesEnabled)
+		color = float4(1, min(lod * 0.5f, 1), 0, 1);
 
 	output.Color = color;
 	output.MipMapLevel = 6.0f - log2(max(output.Inside[0], output.Inside[1]));
@@ -291,7 +286,7 @@ DSOutput DSDefault(HSConstantOutput input, float2 uv : SV_DomainLocation, const 
 	output.Position = mul(position, WorldViewProjection);
 	output.TexCoord = texCoord;
 	output.Color = input.Color;
-	output.Culled = input.Culled;
+	//output.Culled = input.Culled;
 
 	return output;
 }

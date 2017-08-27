@@ -34,7 +34,7 @@ public:
 	void setColormaps(ID3D11ShaderResourceView* colormapsView) { this->colormaps->SetResource(colormapsView); }
 	void setInfomap(ID3D11ShaderResourceView* infomapView) { this->infomap->SetResource(infomapView); }
 	void setSlopemap(ID3D11ShaderResourceView* slopemapView) { this->slopemap->SetResource(slopemapView); }
-	void setRoughnessmaps(ID3D11ShaderResourceView* roughnessmapsView) { this->roughnessmaps->SetResource(roughnessmapsView); }
+	void setRoughnessmap(ID3D11ShaderResourceView* roughnessmapView) { this->roughnessmap->SetResource(roughnessmapView); }
 
 	void setTerrainScale(float terrainScale) { this->terrainScale->SetFloat(terrainScale); }
 	void setMinPatchSize(unsigned minPatchSize) { this->minPatchSize->SetInt(minPatchSize); }
@@ -72,7 +72,7 @@ private:
 	ID3DX11EffectShaderResourceVariable* normalmap;
 	ID3DX11EffectShaderResourceVariable* heightmap;
 	ID3DX11EffectShaderResourceVariable* colormaps;
-	ID3DX11EffectShaderResourceVariable* roughnessmaps;
+	ID3DX11EffectShaderResourceVariable* roughnessmap;
 	ID3DX11EffectShaderResourceVariable* slopemap;
 	ID3DX11EffectShaderResourceVariable* infomap;
 

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <cmath>
 
 #include "..\Helpers\Console.h"
 #include "..\Input\Keyboard.h"
@@ -9,9 +10,12 @@
 #undef min
 #undef max
 
-const char* Terrain::roughnessFilePath = "TerrainRoughness.bin";
+const char* Terrain::roughnessFilePath = "TerrainRoughness.dds";
 const char* Terrain::colorinfoFilePath = "TerrainColorInfo.dds";
 
+const unsigned Terrain::terrainSize = 8192;
+const unsigned Terrain::nodeSize = 256;
+const unsigned Terrain::patchSize = 64;
 
 Terrain::Terrain()
 {
@@ -53,7 +57,7 @@ void Terrain::init(ID3D11Device* graphicsDevice)
 	effect.setSlopeRange(D3DXVECTOR2(0.80f, 1.0f));
 	
 	numPatchRows = numPatchCols = nodeSize / patchSize;
-	numPatches = numPatchRows * numPatchCols;
+	numPatchesPerNode = numPatchRows * numPatchCols;
 	numNodes = (unsigned)(1.5f * std::pow(std::max(numCols, numRows) / nodeSize, 2.0));
 
 	initVertexBuffer(graphicsDevice);
@@ -65,33 +69,12 @@ void Terrain::init(ID3D11Device* graphicsDevice)
 	ID3D11ShaderResourceView* colormaps;
 	ID3D11ShaderResourceView* slopemap;
 	ID3D11ShaderResourceView* infomap;
-	ID3D11ShaderResourceView* roughnessmaps;
+	ID3D11ShaderResourceView* roughnessmap;
 
-	nodes = new Node[numNodes];
 	instances = new Instance[numNodes];
 
-	unsigned numTotalPatches = (numRows / patchSize) * (numCols / patchSize);
-
-	float* patchRoughness = new float[numTotalPatches];
-	ID3D11Texture2D** textures = new ID3D11Texture2D*[(unsigned)(1.5f * numTotalPatches)];
-
-	Console::out << "Calculating Roughness..." << Console::endl;
-	initPatchRoughness(patchRoughness);
-
-	unsigned numCurrentNodes = 1;
-	unsigned numTextures = 0;
-
-	Console::out << "Initializing Nodes..." << Console::endl;
-	initNode(nodes, graphicsDevice, 0, 0, std::max(numRows, numCols), numCurrentNodes, textures, numTextures, patchRoughness);
-
-	Console::out << "Creating Roughness Maps..." << Console::endl;
-	roughnessmaps = createTextureArray(graphicsDevice, textures, numTextures);
-
-	for (unsigned i = 0; i < numTextures; i++)
-		textures[i]->Release();
-
-	delete[] patchRoughness;
-	delete[] textures;
+	Console::out << "Loading Roughnessmap..." << Console::endl;
+	roughnessmap = loadRoughnessmap(graphicsDevice);
 
 	Console::out << "Loading Heightmap..." << Console::endl;
 	D3DX11CreateShaderResourceViewFromFileA(graphicsDevice, "Content/Textures/Heightmap.dds", 0, 0, &heightmap, 0);
@@ -130,14 +113,14 @@ void Terrain::init(ID3D11Device* graphicsDevice)
 	effect.setColormaps(colormaps);
 	effect.setInfomap(infomap);
 	effect.setSlopemap(slopemap);
-	effect.setRoughnessmaps(roughnessmaps);
+	effect.setRoughnessmap(roughnessmap);
 	
 	heightmap->Release();
 	normalmap->Release();
 	colormaps->Release();
 	infomap->Release();
 	slopemap->Release();
-	roughnessmaps->Release();
+	roughnessmap->Release();
 }
 
 
@@ -146,7 +129,6 @@ void Terrain::release()
 	effect.release();
 	heightmap.release();
 
-	delete[] nodes;
 	delete[] instances;
 
 	vertexBuffer->Release();
@@ -163,7 +145,7 @@ void Terrain::update(const D3DXVECTOR3& cameraPos, const BoundingFrustum& viewFr
 	p.x /= terrainScale;
 	p.z /= terrainScale;
 
-	updateNode(nodes, 0, 0, std::max(numRows, numCols), numInstances, p, viewFrustum, cpuFrustumCullingEnabled);
+	updateNode(0, 0, std::max(numRows, numCols), numInstances, p, viewFrustum, cpuFrustumCullingEnabled);
 }
 
 
@@ -190,7 +172,7 @@ void Terrain::draw(ID3D11Device* graphicsDevice, const D3DXMATRIX& world, const 
 	effect.setWorldViewProjection(world, view, projection);
 	effect.getEffectPass()->Apply(0, immediateContext);
 
-	immediateContext->DrawInstanced(numPatches, numInstances, 0, 0);
+	immediateContext->DrawInstanced(numPatchesPerNode, numInstances, 0, 0);
 
 	immediateContext->Release();
 }
@@ -198,7 +180,7 @@ void Terrain::draw(ID3D11Device* graphicsDevice, const D3DXMATRIX& world, const 
 
 void Terrain::initVertexBuffer(ID3D11Device* graphicsDevice)
 {
-	TerrainPatch* patches = new TerrainPatch[numPatches];
+	TerrainPatch* patches = new TerrainPatch[numPatchesPerNode];
 
 	//unsigned numPatchRows = 1;
 	//unsigned numPatchCols = 1;
@@ -212,7 +194,7 @@ void Terrain::initVertexBuffer(ID3D11Device* graphicsDevice)
 	D3D11_BUFFER_DESC bufferDesc;
 
 	bufferDesc.Usage = D3D11_USAGE_IMMUTABLE;
-	bufferDesc.ByteWidth = sizeof(TerrainPatch) * numPatches;
+	bufferDesc.ByteWidth = sizeof(TerrainPatch) * numPatchesPerNode;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.MiscFlags = 0;
@@ -234,7 +216,7 @@ void Terrain::initInstanceBuffer(ID3D11Device* graphicsDevice)
 	D3D11_BUFFER_DESC bufferDesc;
 
 	bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	bufferDesc.ByteWidth = sizeof(Node) * numNodes;
+	bufferDesc.ByteWidth = sizeof(Instance) * numNodes;
 	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = 0;
@@ -243,40 +225,45 @@ void Terrain::initInstanceBuffer(ID3D11Device* graphicsDevice)
 }
 
 
-void Terrain::initPatchRoughness(float* patchRoughness)
+void Terrain::initPatchRoughness(float** patchRoughness, unsigned numLevels) const
 {
-	unsigned numPatchRows = numRows / patchSize;
-	unsigned numPatchCols = numCols / patchSize;
-	unsigned numPatches = numPatchRows * numPatchCols;
-
-	std::ifstream file(roughnessFilePath, std::ios::binary);
-
-	if (file)
+	for (unsigned lod = 0; lod < numLevels; ++lod)
 	{
-		file.read((char*)patchRoughness, sizeof(float) * numPatches);
-		file.close();
-		return;
-	}
+		unsigned currentPatchSize = patchSize * (unsigned)std::powf(2.0f, (float)lod);
 
-	float maxRoughness = 0.0f;
-	unsigned count = 0;
+		unsigned numPatchRows = numRows / currentPatchSize;
+		unsigned numPatchCols = numCols / currentPatchSize;
+		unsigned numPatches = numPatchRows * numPatchCols;
+
+		patchRoughness[lod] = new float[numPatchRows * numPatchCols];
+
+		float maxRoughness = 0.0f;
 		
-	// if roughness file doesn't exist -> create it
-	for (unsigned patchRow = 0; patchRow < numPatchRows; ++patchRow)
-		for (unsigned patchCol = 0; patchCol < numPatchCols; ++patchCol)
-		{
-			float roughness = getPatchRoughness(patchRow, patchCol);
-			maxRoughness = std::max(maxRoughness, roughness);
-			patchRoughness[count++] = roughness;
-		}
+		for (unsigned patchRow = 0; patchRow < numPatchRows; ++patchRow)
+			for (unsigned patchCol = 0; patchCol < numPatchCols; ++patchCol)
+			{
+				float roughness;
 
-	std::ofstream output(roughnessFilePath, std::ios::binary);
+				if (lod == 0)
+					roughness = getPatchRoughness(patchRow, patchCol);
+				else
+				{
+					float p0 = patchRoughness[lod-1][(patchRow * 2 + 0) * numPatchCols * 2 + (patchCol * 2 + 0)];
+					float p1 = patchRoughness[lod-1][(patchRow * 2 + 0) * numPatchCols * 2 + (patchCol * 2 + 1)];
+					float p2 = patchRoughness[lod-1][(patchRow * 2 + 1) * numPatchCols * 2 + (patchCol * 2 + 0)];
+					float p3 = patchRoughness[lod-1][(patchRow * 2 + 1) * numPatchCols * 2 + (patchCol * 2 + 1)];
+					roughness = (p0 + p1 + p2 + p3) / 4;
+				}
 
-	for (unsigned i = 0; i < count; ++i)
-		patchRoughness[i] /= maxRoughness;
+				maxRoughness = std::max(maxRoughness, roughness);
+				patchRoughness[lod][patchRow * numPatchCols + patchCol] = roughness;
+			}
 
-	output.write((char*)patchRoughness, count * sizeof(float));
-	output.close();
+		if (lod == 0)
+			for (unsigned patchRow = 0; patchRow < numPatchRows; ++patchRow)
+				for (unsigned patchCol = 0; patchCol < numPatchCols; ++patchCol)
+					patchRoughness[lod][patchRow * numPatchCols + patchCol] /= maxRoughness;
+	}
 }
 
 
@@ -444,44 +431,31 @@ ID3D11ShaderResourceView* Terrain::createTextureArray(ID3D11Device* graphicsDevi
 }
 
 
-void Terrain::initNode(Node* node, ID3D11Device* graphicsDevice, unsigned row, unsigned col, unsigned size, unsigned& numCurrentNodes, ID3D11Texture2D** textures, unsigned& numTextures, float* patchRoughness)
+ID3D11ShaderResourceView* Terrain::loadRoughnessmap(ID3D11Device* graphicsDevice) const
 {
-	node->textureIndex = numTextures++;
+	ID3D11ShaderResourceView* roughnessmap;
 
-	unsigned numTotalPatchRows = numRows / patchSize;
-	unsigned numTotalPatchCols = numCols / patchSize;
+	// if roughnessmap exists -> load it
+	if (D3DX11CreateShaderResourceViewFromFileA(graphicsDevice, roughnessFilePath, 0, 0, &roughnessmap, 0) != D3D11_ERROR_FILE_NOT_FOUND)
+		return roughnessmap;
 
-	unsigned numPatchRowsPerPatch = size / nodeSize;
-	unsigned numPatchColsPerPatch = size / nodeSize;
+	unsigned numPatchRows = numRows / patchSize;
+	unsigned numPatchCols = numCols / patchSize;
 
-	float* roughness = new float[numPatches];
+	unsigned numLevels = 1 + (unsigned)(std::logf((float)std::max(numPatchRows, numPatchCols)) / std::logf(2));
 
-	unsigned count = 0;
+	float** patchRoughness = new float*[numLevels];
 
-	for (unsigned patchRow = 0; patchRow < numPatchRows; ++patchRow)
-		for (unsigned patchCol = 0; patchCol < numPatchCols; ++patchCol)
-		{
-			float currRoughness = 0;
+	Console::out << "Calculating Roughness..." << Console::endl;
+	initPatchRoughness(patchRoughness, numLevels);
 
-			for (unsigned r = 0; r < numPatchRowsPerPatch; ++r)
-				for (unsigned c = 0; c < numPatchColsPerPatch; ++c)
-				{
-					unsigned currPatchRow = row / patchSize + patchRow * numPatchRowsPerPatch + r;
-					unsigned currPatchCol = col / patchSize + patchCol * numPatchColsPerPatch + c;
-
-					unsigned patchIndex = getPatchIndex(currPatchRow, currPatchCol, numTotalPatchRows, numTotalPatchCols);
-
-					currRoughness += patchRoughness[patchIndex];
-				}
-
-			roughness[count++] = currRoughness / (numPatchRowsPerPatch * numPatchColsPerPatch);
-		}
+	ID3D11Texture2D* texture;
 
 	D3D11_TEXTURE2D_DESC desc;
 
 	desc.Width = numPatchCols;
 	desc.Height = numPatchRows;
-	desc.MipLevels = 1;
+	desc.MipLevels = 0;
 	desc.ArraySize = 1;
 	desc.Format = DXGI_FORMAT_R32_FLOAT;
 	desc.SampleDesc.Count = 1;
@@ -491,32 +465,41 @@ void Terrain::initNode(Node* node, ID3D11Device* graphicsDevice, unsigned row, u
 	desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	desc.MiscFlags = 0;
 
-	D3D11_SUBRESOURCE_DATA initData;
+	D3D11_SUBRESOURCE_DATA* initData = new D3D11_SUBRESOURCE_DATA[numLevels];
 
-	initData.pSysMem = roughness;
-	initData.SysMemPitch = numPatchCols * sizeof(float);
-	initData.SysMemSlicePitch = numPatches * sizeof(float);
-
-	graphicsDevice->CreateTexture2D(&desc, &initData, &textures[node->textureIndex]);
-
-	delete[] roughness;
-
-	unsigned halfSize = size / 2;
-
-	if (halfSize >= nodeSize)
+	for (unsigned i = 0; i < numLevels; ++i)
 	{
-		for (unsigned r = 0; r < 2; ++r)
-			for (unsigned c = 0; c < 2; ++c)
-			{
-				Node* child = &nodes[numCurrentNodes++];
-				initNode(child, graphicsDevice, row + r * halfSize, col + c * halfSize, halfSize, numCurrentNodes, textures, numTextures, patchRoughness);
-				node->children[r * 2 + c] = child;
-			}
+		unsigned cols = numPatchCols / (unsigned)(std::powf(2.0f, (float)i));
+		unsigned rows = numPatchRows / (unsigned)(std::powf(2.0f, (float)i));
+
+		initData[i].pSysMem = patchRoughness[i];
+		initData[i].SysMemPitch = cols * sizeof(float);
+		initData[i].SysMemSlicePitch = rows * cols * sizeof(float);
 	}
+
+	graphicsDevice->CreateTexture2D(&desc, initData, &texture);
+
+	delete[] initData;
+
+	for (unsigned i = 0; i < numLevels; ++i)
+		delete[] patchRoughness[i];
+
+	ID3D11DeviceContext* immediateContext;
+		
+	graphicsDevice->GetImmediateContext(&immediateContext);
+
+	D3DX11SaveTextureToFileA(immediateContext, texture, D3DX11_IFF_DDS, roughnessFilePath);
+
+	texture->Release();
+	immediateContext->Release();
+
+	D3DX11CreateShaderResourceViewFromFileA(graphicsDevice, roughnessFilePath, 0, 0, &roughnessmap, 0);
+	
+	return roughnessmap;
 }
 
 
-void Terrain::updateNode(Node* node, unsigned row, unsigned col, unsigned size, unsigned& numInstances, const D3DXVECTOR3& cameraPos, const BoundingFrustum& viewFrustum, bool frustumCulling)
+void Terrain::updateNode(unsigned row, unsigned col, unsigned size, unsigned& numInstances, const D3DXVECTOR3& cameraPos, const BoundingFrustum& viewFrustum, bool frustumCulling)
 {
 	if (frustumCulling)
 	{
@@ -539,7 +522,7 @@ void Terrain::updateNode(Node* node, unsigned row, unsigned col, unsigned size, 
 	{
 		for (unsigned r = 0; r < 2; ++r)
 			for (unsigned c = 0; c < 2; ++c)
-				updateNode(node->children[r * 2 + c], row + r * halfSize, col + c * halfSize, halfSize, numInstances, cameraPos, viewFrustum, frustumCulling);
+				updateNode( row + r * halfSize, col + c * halfSize, halfSize, numInstances, cameraPos, viewFrustum, frustumCulling);
 	}
 	else
 	{
@@ -548,7 +531,6 @@ void Terrain::updateNode(Node* node, unsigned row, unsigned col, unsigned size, 
 		instance.size = (float)size;
 		instance.row = (float)row;
 		instance.col = (float)col;
-		instance.textureIndex = node->textureIndex;
 	}
 }
 

@@ -45,7 +45,7 @@ void TerrainEffect::init(ID3D11Device* graphicsDevice, const char* path)
 	colormaps = effect->GetVariableByName("Colormaps")->AsShaderResource();
 	infomap = effect->GetVariableByName("Infomap")->AsShaderResource();
 	slopemap = effect->GetVariableByName("Slopemap")->AsShaderResource();
-	roughnessmaps = effect->GetVariableByName("Roughnessmaps")->AsShaderResource();
+	roughnessmap = effect->GetVariableByName("Roughnessmap")->AsShaderResource();
 
 	fakeView = effect->GetVariableByName("FakeView")->AsMatrix();
 
